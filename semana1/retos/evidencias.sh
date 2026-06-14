@@ -22,7 +22,7 @@ echo "Release v1.0 - Información secreta ficticia" | sudo tee /srv/releases/rel
 sudo chown devopslead:release_team /srv/releases/release_notes.txt
 
 sudo chmod 750 /srv/releases
-sudo chmod 770 /srv/releases/release_notes.txt
+sudo chmod 640 /srv/releases/release_notes.txt
 
 ## Prueba
 cgi@teletrabajo-valeria:~/curso-devops/semana1/retos$ sudo -u intruder cat /srv/releases/release_notes.txt
