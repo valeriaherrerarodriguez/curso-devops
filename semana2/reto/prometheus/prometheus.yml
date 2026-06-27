@@ -1,0 +1,14 @@
+global:
+  #métricas cada 5s
+  scrape_interval: 5s
+
+scrape_configs:
+    #nombre del monitoreo
+  - job_name: "nginx"
+    static_configs:
+      - targets: ["nginx-exporter:9113"] #de acá lee las métricas
+
+    #se monitorea así mismo
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["prometheus:9090"]
