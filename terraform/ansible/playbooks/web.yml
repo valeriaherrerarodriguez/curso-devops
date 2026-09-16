@@ -1,0 +1,46 @@
+---
+- name: Configure Web Tier
+  hosts: tier_Web
+  become: true
+
+  tasks:
+    - name: Install Nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+        update_cache: true
+
+    - name: Deploy website
+      ansible.builtin.copy:
+        dest: /var/www/html/index.html
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>AWS DevOps Challenge</title>
+          </head>
+          <body>
+              <h1>AWS DevOps Challenge</h1>
+              <h2>Web Tier funcionando</h2>
+              <p>Configurado con Ansible.</p>
+              <p>Servidor: {{ inventory_hostname }}</p>
+          </body>
+          </html>
+
+      notify:
+        - Restart Nginx
+
+    - name: Ensure Nginx is running
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: true
+
+  handlers:
+    - name: Restart Nginx
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
