@@ -1,0 +1,50 @@
+---
+# Configuración principal del despliegue de la aplicación
+- name: Desplegar TicoMarket
+  hosts: app
+  become: true
+
+  tasks:
+    - name: Actualizar paquetes
+      apt:
+        update_cache: true
+
+    # Instalación y configuración de Docker
+    - name: Instalar Docker
+      apt:
+        name: docker.io
+        state: present
+
+    # Inicio y habilitación del servicio Docker
+    - name: Iniciar Docker
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    # Transferencia de los archivos de la aplicación
+    - name: Copiar aplicacion
+      copy:
+        src: ../app/
+        dest: /opt/ticomarket/
+        mode: "0755"
+
+    # Construcción de la imagen de la aplicación
+    - name: Construir imagen Docker
+      community.docker.docker_image:
+        name: ticomarket
+        tag: "1.0"
+        source: build
+        build:
+          path: /opt/ticomarket/
+        state: present
+
+    # Creación y ejecución del contenedor de la aplicación
+    - name: Ejecutar contenedor TicoMarket
+      community.docker.docker_container:
+        name: ticomarket
+        image: ticomarket:1.0
+        state: started
+        restart_policy: unless-stopped
+        ports:
+          - "5000:5000"
