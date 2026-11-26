@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: teemii
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: teemii-data
+  namespace: teemii
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: teemii-backend
+  namespace: teemii
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: teemii-backend
+  template:
+    metadata:
+      labels:
+        app: teemii-backend
+    spec:
+      containers:
+        - name: teemii-backend
+          image: dokkaner/teemii-backend:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: "production"
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: teemii-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: teemii-backend
+  namespace: teemii
+spec:
+  selector:
+    app: teemii-backend
+  ports:
+    - port: 3000
+      targetPort: 3000
