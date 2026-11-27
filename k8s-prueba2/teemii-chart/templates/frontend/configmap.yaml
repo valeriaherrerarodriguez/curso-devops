@@ -7,7 +7,7 @@ metadata:
     {{- include "teemii.labels" . | nindent 4 }}
 data:
   default.conf: |
-    # PLANTILLA: ajustar con la configuración real de la imagen (Paso 13)
+    # Configuración opcional de nginx; el proxy al backend usa .Values.backend.url
     server {
       listen {{ .Values.frontend.containerPort }};
       root /usr/share/nginx/html;

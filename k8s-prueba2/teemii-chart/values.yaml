@@ -9,7 +9,7 @@ frontend:
     type: NodePort
     port: 8080
     nodePort: 30080
-  # Reemplaza la configuración de nginx de la imagen por una plantilla de Helm (Paso 13)
+  # true = usar la configuración de nginx del chart; false = usar la de la imagen
   customNginx:
     enabled: false
 
