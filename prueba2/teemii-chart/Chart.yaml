@@ -1,6 +1,0 @@
-apiVersion: v2
-name: teemii-chart
-description: Despliegue de Teemii (frontend, backend y base de datos) en Kubernetes
-type: application
-version: 0.1.0
-appVersion: "latest"
