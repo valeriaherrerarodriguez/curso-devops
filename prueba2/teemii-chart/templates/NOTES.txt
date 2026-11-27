@@ -1,0 +1,12 @@
+Teemii instalado como "{{ .Release.Name }}".
+
+Ver pods:
+  kubectl get pods -l app.kubernetes.io/instance={{ .Release.Name }}
+
+Acceso con port-forward:
+  kubectl port-forward svc/teemii-frontend {{ .Values.frontend.service.port }}:{{ .Values.frontend.service.port }}
+{{- if .Values.ingress.enabled }}
+
+Acceso por Ingress:
+  curl -H "Host: {{ .Values.ingress.host }}" http://localhost:8081
+{{- end }}
