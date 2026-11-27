@@ -1,0 +1,21 @@
+{{- if .Values.frontend.customNginx.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: teemii-frontend-nginx
+  labels:
+    {{- include "teemii.labels" . | nindent 4 }}
+data:
+  default.conf: |
+    # PLANTILLA: ajustar con la configuración real de la imagen (Paso 13)
+    server {
+      listen {{ .Values.frontend.containerPort }};
+      root /usr/share/nginx/html;
+      location / {
+        try_files $uri /index.html;
+      }
+      location /api/ {
+        proxy_pass {{ .Values.backend.url }};
+      }
+    }
+{{- end }}

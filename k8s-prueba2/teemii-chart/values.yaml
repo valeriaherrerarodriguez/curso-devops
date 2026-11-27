@@ -1,0 +1,50 @@
+frontend:
+  replicas: 1
+  image:
+    repository: dokkaner/teemii-frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+  containerPort: 80
+  service:
+    type: NodePort
+    port: 8080
+    nodePort: 30080
+  # Reemplaza la configuración de nginx de la imagen por una plantilla de Helm (Paso 13)
+  customNginx:
+    enabled: false
+
+backend:
+  # El nginx del frontend llama al backend por este nombre: no cambiarlo
+  serviceName: teemii-backend
+  url: http://teemii-backend:3000
+  replicas: 1
+  image:
+    repository: dokkaner/teemii-backend
+    tag: latest
+    pullPolicy: IfNotPresent
+  port: 3000
+  env:
+    NODE_ENV: production
+  persistence:
+    size: 2Gi
+    storageClass: ""        # vacío = StorageClass por defecto (en kind: standard)
+    mountPath: /data
+
+database:
+  enabled: true
+  serviceName: teemii-db
+  image:
+    repository: postgres
+    tag: "16-alpine"
+  port: 5432
+  name: teemii
+  user: teemii
+  password: ""   # vacío = se genera una aleatoria al instalar
+  persistence:
+    size: 1Gi
+    storageClass: ""
+
+ingress:
+  enabled: false
+  className: nginx
+  host: teemii.local

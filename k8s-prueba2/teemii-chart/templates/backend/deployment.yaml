@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: teemii-backend
+  labels:
+    {{- include "teemii.labels" . | nindent 4 }}
+    app: teemii-backend
+spec:
+  replicas: {{ .Values.backend.replicas }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: teemii-backend
+  template:
+    metadata:
+      labels:
+        app: teemii-backend
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/backend/configmap.yaml") . | sha256sum }}
+    spec:
+      {{- if .Values.database.enabled }}
+      initContainers:
+        - name: esperar-db
+          image: "{{ .Values.database.image.repository }}:{{ .Values.database.image.tag }}"
+          command:
+            - sh
+            - -c
+            - |
+              until pg_isready -h {{ .Values.database.serviceName }} -p {{ .Values.database.port }}; do
+                echo "Esperando a la base de datos..."
+                sleep 2
+              done
+              echo "Base de datos lista"
+      {{- end }}
+      containers:
+        - name: teemii-backend
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.backend.port }}
+          envFrom:
+            - configMapRef:
+                name: teemii-backend-config
+          {{- if .Values.database.enabled }}
+          env:
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: teemii-db-secret
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: teemii-db-secret
+                  key: password
+          {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: {{ .Values.backend.persistence.mountPath }}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: teemii-data
